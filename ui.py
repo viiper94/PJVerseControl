@@ -10,8 +10,8 @@ class ProjectorControlApp(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("PJ Verse Control")
-        # self.resize(850, 540)
-        self.resize(755, 527)
+        self.resize(850, 610)
+        # self.resize(755, 527)
 
         self.controller = ProjectorController(log_callback=self.log_message)
 
@@ -35,7 +35,7 @@ class ProjectorControlApp(QMainWindow):
         # --- all-projectors row ---
         group_row = QHBoxLayout()
         group_row.setAlignment(Qt.AlignLeft)
-        group_row.addSpacing(26)
+        group_row.addSpacing(112)
 
         for label, cmd in [
             ("All ON", "turn_on"),
@@ -111,16 +111,16 @@ class ProjectorControlApp(QMainWindow):
                 line.setFrameShadow(QFrame.Sunken)
                 scroll_layout.addWidget(line)
 
-            # port_box = QComboBox()
-            # ports = self.controller.available_ports()
-            # port_box.addItem("¯\_(ツ)_/¯")
-            # port_box.addItems(ports)
-            # saved = self.controller.projector_ports.get(i)
-            # if saved and saved in ports:
-            #     port_box.setCurrentText(saved)
-            # port_box.currentTextChanged.connect(lambda val, idx=i: self.controller.set_port(idx, val))
-            # port_box.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-            # row.addWidget(port_box)
+            port_box = QComboBox()
+            ports = self.controller.available_ports()
+            port_box.addItem("¯\_(ツ)_/¯")
+            port_box.addItems(ports)
+            saved = self.controller.projector_ports.get(i)
+            if saved and saved in ports:
+                port_box.setCurrentText(saved)
+            port_box.currentTextChanged.connect(lambda val, idx=i: self.controller.set_port(idx, val))
+            port_box.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+            row.addWidget(port_box)
 
             scroll_layout.addLayout(row)
 
@@ -130,7 +130,7 @@ class ProjectorControlApp(QMainWindow):
         # --- log box ---
         self.log = QTextEdit()
         self.log.setReadOnly(True)
-        self.log.setFixedHeight(60)
+        self.log.setFixedHeight(120)
         main_layout.addWidget(self.log)
 
         self.setLayout(main_layout)
