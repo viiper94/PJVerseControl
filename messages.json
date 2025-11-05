@@ -1,10 +1,12 @@
 {
   "turn_on": "\r*pow=on#\r",
   "turn_off": "\r*pow=off#\r",
+  "ask_pwr": "\r*pow=?#\r",
   "freeze": "\r*freeze=on#\r",
   "unfreeze": "\r*freeze=off#\r",
   "blank": "\r*blank=on#\r",
   "unblank": "\r*blank=off#\r",
   "hdmi1": "\r*sour=hdmi#\r",
-  "hdmi2": "\r*sour=hdmi2#\r"
+  "hdmi2": "\r*sour=hdmi2#\r",
+  "url": "https://esupportdownload.benq.com/esupport/PROJECTOR/Control%20Protocols/LH600ST/LH600ST_RS232%20Control%20Guide_v1.0.1_Windows.pdf"
 }
