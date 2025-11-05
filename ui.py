@@ -2,7 +2,7 @@ from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QComboBox, QTextEdit,
     QScrollArea, QFrame, QSizePolicy, QLabel, QSpacerItem, QMainWindow
 )
-from PySide6.QtCore import QDateTime, Qt
+from PySide6.QtCore import Qt
 from controller import ProjectorController, NUM_PROJECTORS
 
 
@@ -13,7 +13,7 @@ class ProjectorControlApp(QMainWindow):
         # self.resize(850, 540)
         self.resize(755, 527)
 
-        self.controller = ProjectorController()
+        self.controller = ProjectorController(log_callback=self.log_message)
 
         self.init_ui()
 
@@ -83,6 +83,7 @@ class ProjectorControlApp(QMainWindow):
             row.addWidget(name)
 
             for label, cmd in [
+                ("Get Status", "ask_pwr"),
                 ("On", "turn_on"),
                 ("Off", "turn_off"),
                 ("Freeze", "freeze"),
@@ -139,17 +140,13 @@ class ProjectorControlApp(QMainWindow):
         btn = self.sender()
         cmd = btn.property("cmd")
         index = btn.property("index")
-        result = self.controller.send_command(index, cmd)
-        self.log_message(result)
+        self.controller.send_command(index, cmd)
 
     def handle_all_button(self):
         cmd = self.sender().property("cmd")
-        for i in range(1, NUM_PROJECTORS):
-            result = self.controller.send_command(i, cmd)
-            self.log_message(result)
+        self.controller.send_to_all(cmd)
 
     # ---------------- LOG -----------------
     def log_message(self, text):
-        ts = QDateTime.currentDateTime().toString("HH:mm:ss")
-        self.log.append(f"[{ts}] {text}")
+        self.log.append(text)
         self.log.verticalScrollBar().setValue(self.log.verticalScrollBar().maximum())

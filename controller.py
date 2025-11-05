@@ -2,6 +2,9 @@ import json
 import os
 import serial
 import serial.tools.list_ports
+from datetime import datetime
+
+from worker import ProjectorWorker
 
 MESSAGES_FILE = "messages.json"
 PORTS_FILE = "ports_config.json"
@@ -10,7 +13,8 @@ BAUDRATE = 115200
 
 
 class ProjectorController:
-    def __init__(self):
+    def __init__(self, log_callback=None):
+        self.log_callback = log_callback
         self.messages = self.load_messages()
         self.projector_ports = {i: "" for i in range(1, NUM_PROJECTORS + 1)}
         self.load_ports_config()
@@ -54,21 +58,36 @@ class ProjectorController:
         self.save_ports_config()
 
     # ---------------- SERIAL SENDING -----------------
-    def send_command(self, index, cmd_key):
+    def send_command(self, index, cmd):
+        """Start a worker thread to send command to one projector."""
         port = self.projector_ports.get(index)
-        if not port or port == "Select COM Port":
-            return f"Projector {index}: no port selected"
+        if not port:
+            self._log(f"Projector {index}: No COM port selected")
+            return
 
-        cmd = self.messages.get(cmd_key)
-        if not cmd:
-            return f"Command '{cmd_key}' not found"
+        msg = self.messages.get(cmd)
+        if not msg:
+            self._log(f"Command '{cmd}' not found in messages.json")
+            return
 
-        try:
-            with serial.Serial(port, BAUDRATE, timeout=1) as ser:
-                if isinstance(cmd, str):
-                    ser.write(cmd.encode("utf-8"))
-                elif isinstance(cmd, list):
-                    ser.write(bytes(cmd))
-            return f"Sent {cmd_key} to projector {index} ({port})"
-        except Exception as e:
-            return f"Error sending to projector {index} ({port}): {e}"
+        worker = ProjectorWorker(
+            index=index,
+            port=port,
+            baudrate=BAUDRATE,
+            command=cmd,
+            message=msg,
+            log_callback=self._log
+        )
+        worker.start()
+
+    def send_to_all(self, cmd):
+        for i in range(1, NUM_PROJECTORS):
+            self.send_command(i, cmd)
+
+    # ---------------- LOGGING -----------------
+    def _log(self, text):
+        ts = datetime.now().strftime("%H:%M:%S")
+        if callable(self.log_callback):
+            self.log_callback(f"[{ts}] {text}")
+        else:
+            print(f"[{ts}] {text}")
